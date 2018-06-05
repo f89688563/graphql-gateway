@@ -8,15 +8,13 @@ import { execute, subscribe } from 'graphql';
 import { createServer } from 'http';
 
 import buildSchema from './schema';
-import config from './config';
+import { sessionStoreSecret, PORT } from './config';
 
 const graphqlEndpoint = '/graphql';
 const WS_GQL_PATH = '/subscriptions';
 
 // Arguments usually come from env vars
 export async function run() {
-  const PORT = 3010;
-
   const schema = await buildSchema();
 
   const app = express();
@@ -26,7 +24,7 @@ export async function run() {
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json());
 
-  app.use(cookieParser(config.sessionStoreSecret));
+  app.use(cookieParser(sessionStoreSecret));
 
   app.use(
     graphqlEndpoint,
