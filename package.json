@@ -30,8 +30,11 @@
   "dependencies": {
     "apollo-cache-control": "0.0.9",
     "apollo-engine": "^1.0.4",
+    "apollo-link": "^1.2.2",
     "apollo-link-http": "^1.5.4",
+    "apollo-link-ws": "^1.0.8",
     "apollo-server-express": "^1.3.2",
+    "apollo-utilities": "^1.0.13",
     "babel-cli": "6.26.0",
     "babel-core": "6.26.0",
     "babel-preset-es2015": "6.24.1",
@@ -63,7 +66,9 @@
     "pg": "^7.4.1",
     "pg-connection-string": "^2.0.0",
     "reddit-score": "0.0.2",
+    "request": "^2.87.0",
     "request-promise": "4.2.2",
-    "subscriptions-transport-ws": "^0.9.5"
+    "subscriptions-transport-ws": "^0.9.5",
+    "ws": "^5.2.0"
   }
 }

@@ -1,12 +1,35 @@
 import { HttpLink } from 'apollo-link-http';
 import { mergeSchemas, introspectSchema, makeRemoteExecutableSchema } from 'graphql-tools';
 import fetch from 'node-fetch';
+import { split } from 'apollo-link';
+import { WebSocketLink } from 'apollo-link-ws';
+import { getMainDefinition } from 'apollo-utilities';
+import ws from 'ws';
 
 import { remoteSchema } from './config';
 
-const loadRemoteSchema = async (uri) => {
+const loadRemoteSchema = async ({ uri, wsUri }) => {
   try {
-    const link = new HttpLink({ uri, fetch });
+    const httpLink = new HttpLink({ uri, fetch });
+
+    // 建立子服务的ws链接，用于支持subscription
+    const wsLink = new WebSocketLink({
+      uri: wsUri,
+      options: {
+        reconnect: true,
+      },
+      webSocketImpl: ws,
+    });
+
+    const link = split(
+      // split based on operation type
+      ({ query }) => {
+        const { kind, operation } = getMainDefinition(query);
+        return kind === 'OperationDefinition' && operation === 'subscription';
+      },
+      wsLink,
+      httpLink,
+    );
     const schema = await introspectSchema(link);
     const executableSchema = makeRemoteExecutableSchema({
       schema,
