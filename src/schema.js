@@ -11,25 +11,30 @@ import { remoteSchema } from './config';
 const loadRemoteSchema = async ({ uri, wsUri }) => {
   try {
     const httpLink = new HttpLink({ uri, fetch });
+    let link = null;
 
-    // 建立子服务的ws链接，用于支持subscription
-    const wsLink = new WebSocketLink({
-      uri: wsUri,
-      options: {
-        reconnect: true,
-      },
-      webSocketImpl: ws,
-    });
+    if (wsUri) {
+      // 建立子服务的ws链接，用于支持subscription
+      const wsLink = new WebSocketLink({
+        uri: wsUri,
+        options: {
+          reconnect: true,
+        },
+        webSocketImpl: ws,
+      });
 
-    const link = split(
-      // split based on operation type
-      ({ query }) => {
-        const { kind, operation } = getMainDefinition(query);
-        return kind === 'OperationDefinition' && operation === 'subscription';
-      },
-      wsLink,
-      httpLink,
-    );
+      link = split(
+        // split based on operation type
+        ({ query }) => {
+          const { kind, operation } = getMainDefinition(query);
+          return kind === 'OperationDefinition' && operation === 'subscription';
+        },
+        wsLink,
+        httpLink,
+      );
+    } else {
+      link = httpLink;
+    }
     const schema = await introspectSchema(link);
     const executableSchema = makeRemoteExecutableSchema({
       schema,
